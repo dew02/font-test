@@ -21,13 +21,24 @@ def fontRegistered():
 
 
 def main():
-    fontRegistered()
-
     # 시스템에 설치된 폰트 이름 목록 가져오기
     fontNames = list(set(f.name for f in fm.fontManager.ttflist))
 
     # Streamlit의 selectbox로 폰트 선택
     fontname = st.selectbox("폰트 선택", fontNames)
+
+    # 선택된 폰트의 경로 찾기
+    font_path = None
+    for font in fm.fontManager.ttflist:
+        if font.name == fontname:
+            font_path = font.fname
+            break
+
+    # 선택된 폰트 경로 출력
+    if font_path:
+        st.write(f"선택된 폰트 경로: {font_path}")
+    else:
+        st.write("폰트를 찾을 수 없습니다.")
 
     # 선택된 폰트로 설정
     plt.rc('font', family=fontname)

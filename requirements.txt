@@ -1,3 +1,6 @@
-pandas
 streamlit
+requests
 matplotlib
+pandas
+BytesIO
+tempfile

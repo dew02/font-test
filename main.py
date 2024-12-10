@@ -12,7 +12,7 @@ import matplotlib.font_manager as fm  # 폰트 관련 용도 as fm
 @st.cache_data
 def fontRegistered():
     font_dirs = [os.getcwd() + '/customFonts']
-    st.write(fond_dirs)
+    st.write(font_dirs)
     font_files = fm.findSystemFonts(fontpaths=font_dirs)
 
     for font_file in font_files:

@@ -1,72 +1,40 @@
-# -*- coding:utf-8 -*-
 import streamlit as st
+import requests
 import matplotlib.pyplot as plt
 import pandas as pd
+from io import BytesIO
+from matplotlib import font_manager
+import tempfile
 
-# 한글폰트 적용
-# 폰트 적용
-import os
-import matplotlib.font_manager as fm  # 폰트 관련 용도 as fm
+# GitHub에서 TTF 파일 다운로드 (raw URL 사용)
+url = 'https://raw.githubusercontent.com/dew02/font-test/main/NoonnuBasicGothicRegular.ttf'
+response = requests.get(url)
 
+# TTF 파일을 임시 파일로 저장
+with tempfile.NamedTemporaryFile(delete=False, suffix='.ttf') as temp_font_file:
+    temp_font_file.write(response.content)
+    temp_font_path = temp_font_file.name
 
-@st.cache_data
-def fontRegistered():
-    font_dirs = [os.getcwd() + '/customFonts']
-    st.write(font_dirs)
-    font_files = fm.findSystemFonts(fontpaths=font_dirs)
+# 폰트 등록 (명시적으로 경로 지정)
+font_prop = font_manager.FontProperties(fname=temp_font_path)
 
-    for font_file in font_files:
-        fm.fontManager.addfont(font_file)
-    fm._load_fontmanager(try_read_cache=False)
+# 간단한 데이터프레임 생성
+data = {
+    'total_bill': [16.99, 10.34, 21.01, 23.68, 24.59],
+    'tip': [1.01, 1.66, 3.50, 3.31, 3.61],
+    'day': ['Sun', 'Sun', 'Sun', 'Sun', 'Sun']
+}
+df = pd.DataFrame(data)
 
+# 스캐터 플롯 그리기
+fig, ax = plt.subplots()
+ax.scatter(df['total_bill'], df['tip'], c='blue', label='Tips')
 
-def main():
-    # 시스템에 설치된 폰트 이름 목록 가져오기
-    fontNames = list(set(f.name for f in fm.fontManager.ttflist))
+# 제목, 축 레이블 추가
+ax.set_title("한글 테스트", fontproperties=font_prop)  # 폰트 속성 추가
+ax.set_xlabel("Total Bill", fontproperties=font_prop)
+ax.set_ylabel("Tip", fontproperties=font_prop)
+ax.legend(prop=font_prop)  # 범례에도 폰트 적용
 
-    # Streamlit의 selectbox로 폰트 선택
-    fontname = st.selectbox("폰트 선택", fontNames)
-
-    # 선택된 폰트의 경로 찾기
-    font_path = None
-    for font in fm.fontManager.ttflist:
-        if font.name == fontname:
-            font_path = font.fname
-            break
-
-    # 선택된 폰트 경로 출력
-    if font_path:
-        st.write(f"선택된 폰트 경로: {font_path}")
-    else:
-        st.write("폰트를 찾을 수 없습니다.")
-
-    # 선택된 폰트로 설정
-    plt.rc('font', family=fontname)
-
-    # 간단한 데이터프레임 생성
-    data = {
-        'total_bill': [16.99, 10.34, 21.01, 23.68, 24.59],
-        'tip': [1.01, 1.66, 3.50, 3.31, 3.61],
-        'day': ['Sun', 'Sun', 'Sun', 'Sun', 'Sun']
-    }
-    df = pd.DataFrame(data)
-
-    # 스캐터 플롯 그리기
-    fig, ax = plt.subplots()
-    ax.scatter(df['total_bill'], df['tip'], c='blue', label='Tips')
-
-    # 제목, 축 레이블 추가
-    ax.set_title("한글 테스트")
-    ax.set_xlabel("Total Bill")
-    ax.set_ylabel("Tip")
-    ax.legend()
-
-    # 그래프 표시
-    st.pyplot(fig)
-
-    # 데이터프레임 표시
-    st.dataframe(df)
-
-
-if __name__ == "__main__":
-    main()
+# 그래프 표시
+st.pyplot(fig)
